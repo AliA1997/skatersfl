@@ -5,28 +5,17 @@ import { useEffect, useMemo, useState } from "react";
 import { Product, useCartStore } from "@/store/useCartStore";
 import StripeElementsProvider from "@/components/stripe-elements-provider";
 import { StripePaymentRequest } from "@/lib/types";
-import * as z from 'zod'
-import PaymentSuccessInfo from "@/components/cart/PaymentSuccessInfo";
-import { Loader, Loader2 } from "lucide-react";
+import LoadingSection from "@/components/LoadingSection";
 
 export const runtime = "edge";
 
-export default function CartPage({
-  searchParams,
-}: {
-  searchParams: {
-    paymentIntentId: string | undefined;
-    success: boolean | undefined;
-  };
-}) {
+export default function CartPage() {
   const [clientSecretState, setClientSecretState] = useState<string>('');
   const [mounted, setMounted] = useState<boolean>(false);
-  const { cart, totalAmount, resetCart } = useCartStore();
+  const { cart, totalAmount, setPaymentIntentId, paymentIntentId } = useCartStore();
   const totalAmountInCents = useMemo(() => (parseFloat(totalAmount.toFixed(2)) * 100).toFixed(2),  [totalAmount]);
-  const showSuccess = useMemo(() => (!!searchParams.paymentIntentId && !!searchParams.success), [searchParams]);
 
   async function startPaymentIntent() {
-    // alert(JSON.stringify(cart))
       const cartProducts = cart.map((item: Product) => ({
           id: item._id,
           price: item.price,
@@ -43,62 +32,40 @@ export default function CartPage({
           } as StripePaymentRequest),
       }).then((response) => response.json());
 
-      console.log("RESPONSE JSON:", responseJson);
-
       setClientSecretState(responseJson.clientSecret);
+      setPaymentIntentId(responseJson.clientSecret);
   }
 
   useEffect(() => {
-    if(cart.length && !mounted) {
-      if(!showSuccess)
-        startPaymentIntent();
+    if(cart.length && !paymentIntentId && !mounted) {
+      startPaymentIntent();
     }
-
-  }, [cart, mounted]);
-
-  useEffect(() => {
-    if(showSuccess && searchParams.paymentIntentId) {
-      setClientSecretState(searchParams.paymentIntentId)
-    }
-
-
     setMounted(true);
 
-    
     return () => {
       setMounted(false);
-    }
+    };
 
-  }, [searchParams]);
+  }, [cart]);
 
-  console.log('mounted:', mounted);
-  console.log('clientSecretState:', clientSecretState)
-
-  if(mounted && clientSecretState)
+  if(mounted && paymentIntentId)
     return (
       <section className="p-2">
-        <StripeElementsProvider total={parseFloat(totalAmountInCents)} clientSecret={clientSecretState}>
-          {!showSuccess && (
+        <StripeElementsProvider total={parseFloat(totalAmountInCents)} clientSecret={paymentIntentId}>
+          {cart && cart.length ? (
             <>
               <CartOrderTable />
               <div className="py-2">
                 <h1 className="p-2 text-2xl font-bold">Checkout</h1>
-                <CartForm stripePaymentIntentId={clientSecretState} />
+                <CartForm stripePaymentIntentId={paymentIntentId} />
               </div>
             </>
-          )}
-          {showSuccess && (
-            <div className='py-2'>
-               <PaymentSuccessInfo paymentIntentId={searchParams.paymentIntentId} />
-            </div>
+          ) : (
+            <p>No items have been added to cart.</p>
           )}
         </StripeElementsProvider>
       </section>
     );
-  if(mounted && !(cart && cart.length))
-    return (
-      <p>No items have been added to cart.</p>
-    );
 
-  return <div className='flex justify-center'><Loader2 size={100} className="animate-spin"/></div>
+  return <LoadingSection />;
 }

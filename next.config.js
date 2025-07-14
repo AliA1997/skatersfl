@@ -9,6 +9,9 @@ const nextConfig = {
     ],
     formats: ["image/webp"],
   },
+  experimental: {
+    serverComponentsExternalPackages: ['undici']
+  }
 };
 
 module.exports = nextConfig;

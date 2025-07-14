@@ -6,7 +6,7 @@ export default function TermsOfService() {
       <section>
         <h3 className="p-2 text-2xl">1. Acceptance of Terms</h3>
         <p className="p-2">
-          By accessing and using skatersfl.com, you agree to comply with and be
+          By accessing and using skatersfl.netlify.app, you agree to comply with and be
           bound by these Terms of Service. If you disagree with any part of these terms,
           you may not access our website or purchase our products.
         </p>
@@ -36,7 +36,7 @@ export default function TermsOfService() {
         <h3 className="p-2 text-2xl">4. Payment Processing</h3>
         <p className="p-2">
           We use secure third-party payment processors for all transactions. By making
-          a purchase through skatersfl.com, you agree to the processor's terms and
+          a purchase through skatersfl.netlify.app, you agree to the processor's terms and
           authorize us to charge your chosen payment method.
         </p>
         <p className="p-2">

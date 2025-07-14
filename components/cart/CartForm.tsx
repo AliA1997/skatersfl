@@ -16,21 +16,22 @@ export default function CartForm({ stripePaymentIntentId }: Props) {
     const elements = useElements();
     const [message, setMessage] = useState('');
     const [isLoading, setIsLoading] = useState(false);
-
-
+        console.log('elements card:', elements?.getElement('card'))
 
     const onSubmit =  async (e: React.FormEvent) => {
         e.preventDefault();
         setIsLoading(true);
-
         const { error } = await stripe!.confirmPayment({
             elements: elements as StripeElements,
             confirmParams: {
-                return_url: `http://localhost:3000/cart?paymentIntentId=${stripePaymentIntentId}&success=true`,
+                return_url: `${process.env.NEXT_PUBLIC_SITE_URL}/cart/success?paymentIntentId=${stripePaymentIntentId}&success=true`,
             },
+            redirect: 'if_required'
         });
 
         if (error) {
+            console.log("errro:", error)
+            alert(JSON.stringify(error));
             if (error.type === 'card_error' || error.type === 'validation_error') {
                 setMessage(error.message || 'An error occurred.');
             } else {
@@ -39,15 +40,6 @@ export default function CartForm({ stripePaymentIntentId }: Props) {
         }
 
         setIsLoading(false);
-
-        // if (response.status === "issued") {
-        //     router.push(
-        //         `/cart/success?name=${response.customer_details.name}&email=${response.customer_details.email}&phoneNumber=${response.customer_details.contact}&short_url=${response.short_url}`,
-        //     );
-        // } else {
-        //     console.error("An error occurred please try again");
-        // }
-
     };
 
     return (
@@ -60,7 +52,7 @@ export default function CartForm({ stripePaymentIntentId }: Props) {
                     options={{
                         layout: {
                             type: 'tabs'
-                        },
+                        },  
                     }}
                 />
                 <AddressElement 
@@ -71,10 +63,11 @@ export default function CartForm({ stripePaymentIntentId }: Props) {
                     type="submit"
                     className="rounded-md px-4 py-2 text-white cursor-pointer hover:opacity-80"
                     style={{ cursor: 'cursor-pointer' }}
+                    disabled={isLoading}
                 >
                     {isLoading ? (
                         <div className=" flex flex-row gap-2">
-                            <span>Loading</span>
+                            <span>Purchasing...</span>
                             <Loader2 className="animate-spin" />
                         </div>
                     ) : (

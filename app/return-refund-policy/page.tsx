@@ -62,7 +62,7 @@ export default function ReturnRefundPolicy() {
         </p>
         <ol className="list-disc p-2">
           <li>
-            Email <a href="mailto:aabiz1997@gmail.com">returns@skatersfl.com</a>
+            Email <a href="mailto:aabiz1997@gmail.com">returns@skatersfl.netlify.app</a>
             with photos of the issue and your order number
           </li>
           <li>

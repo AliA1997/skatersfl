@@ -41,7 +41,7 @@ const ProductPage = async ({ params }: Props) => {
   const product: Product = await getProductBySlug(params.productSlug);
 
   const jsonLd = {  
-    "@context": "https://www.skatersfl.com/",
+    "@context": "https://skatersfl.netlify.app//",
     "@type": "Product",
     name: product.title,
     image: urlForImage(product.images[0]),

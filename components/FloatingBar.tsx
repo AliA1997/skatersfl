@@ -13,10 +13,10 @@ export default function FloatingBar() {
         .share({
           title: "skatersfl",
           text: "Manufacturer, Wholesaler & Exporter of Jute bags, Cotton Bag for Corporate Events & Exhibitions",
-          url: `https://www.skatersfl.com${pathname}`,
+          url: `https://skatersfl.netlify.app/${pathname}`,
         })
     } else {
-      navigator.clipboard.writeText(`https://www.skatersfl.com${pathname}`);
+      navigator.clipboard.writeText(`https://skatersfl.netlify.app/${pathname}`);
       alert("Link copied to clipboard");
     }
   };

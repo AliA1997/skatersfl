@@ -45,6 +45,8 @@ async function POST_SUBMIT_PAYMENT(
                 items: JSON.stringify(productMetadataArray),
             },
             payment_method_configuration: process.env.STRIPE_PAYMENT_CONFIGURATION!,
+            confirmation_method: 'automatic',
+            capture_method: 'automatic'
         });
 
 

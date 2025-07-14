@@ -16,12 +16,14 @@ export type State = {
   cart: Product[];
   totalItems: number;
   totalAmount: number;
+  paymentIntentId: string;
 };
 
 export type Actions = {
   addToCart: (Item: Product) => void;
   removeFromCart: (Item: Product) => void;
   deleteFromCart: (Item: Product) => void;
+  setPaymentIntentId: (paymentIntentId: string) => void;
   resetCart: () => void;
 };
 
@@ -29,6 +31,7 @@ const INITIAL_STATE = {
   cart: [],
   totalItems: 0,
   totalAmount: 0,
+  paymentIntentId: ''
 };
 
 export const useCartStore = create(
@@ -37,6 +40,7 @@ export const useCartStore = create(
       cart: INITIAL_STATE.cart,
       totalItems: INITIAL_STATE.totalItems,
       totalAmount: INITIAL_STATE.totalAmount,
+      paymentIntentId: INITIAL_STATE.paymentIntentId,
       addToCart: (product: Product) => {
         const cart = get().cart;
         const cartItem = cart.find(
@@ -97,11 +101,18 @@ export const useCartStore = create(
           ),
         }));
       },
+      setPaymentIntentId: (paymentIntentId: string) => {
+        set((state) => ({
+          ...state,
+          paymentIntentId: paymentIntentId
+        }))
+      },
       resetCart: () => {
         set(() => ({
           cart: INITIAL_STATE.cart,
           totalItems: INITIAL_STATE.totalItems,
           totalAmount: INITIAL_STATE.totalAmount,
+          paymentIntentId: INITIAL_STATE.paymentIntentId
         }))
       }
     }),
