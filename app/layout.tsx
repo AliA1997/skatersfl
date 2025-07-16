@@ -7,7 +7,6 @@ import { Toaster } from "@/components/ui/toaster";
 import { ThemeProvider } from "@/components/theme-provider";
 import { cn } from "@/lib/utils";
 import FloatingBar from "@/components/FloatingBar";
-import 'web-streams-polyfill';
 
 const fontSans = Inter({ subsets: ["latin"], variable: "--font-sans" });
 

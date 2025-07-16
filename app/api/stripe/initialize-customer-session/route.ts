@@ -8,10 +8,16 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   typescript: true,
 });
 
-async function POST_SUBMIT_PAYMENT(
+async function POST_INITIALIZE_CUSTOMER_SESSION(
     request: NextRequest
 ) {
+    const searchParams = new URLSearchParams(request.url);
+    const searchParamCustomerId = searchParams.get('customerId');
+    const newCustomer = !searchParamCustomerId;
+    
     let paymentIntent;
+    let customer;
+    let customerSession;
     try {
         const { products }: StripePaymentRequest = await request.json();
         
@@ -38,6 +44,13 @@ async function POST_SUBMIT_PAYMENT(
         });
         const productMetadataArray = Array.from(productDict.values());
         
+
+        if(newCustomer) {
+            customer = await stripe.customers.create({
+                tax_exempt: 'exempt'
+            })
+        }
+
         paymentIntent = await stripe.paymentIntents.create({
             amount: productMetadataArray.reduce((t: number, item: StripePaymentIntentProductMetadata) => t += item.totalCost, 0),
             currency: 'usd',
@@ -45,11 +58,25 @@ async function POST_SUBMIT_PAYMENT(
                 items: JSON.stringify(productMetadataArray),
             },
             payment_method_configuration: process.env.STRIPE_PAYMENT_CONFIGURATION!,
+            customer: customer?.id ?? searchParamCustomerId!,
             confirmation_method: 'automatic',
-            capture_method: 'automatic'
+            capture_method: 'manual'
         });
 
-
+        customerSession = await stripe.customerSessions.create({
+            customer: customer?.id ?? searchParamCustomerId!,
+            components: {
+                payment_element: {
+                    enabled: true,
+                    features: {
+                        payment_method_redisplay: 'enabled',
+                        payment_method_save: 'enabled',
+                        payment_method_save_usage: 'off_session',
+                        payment_method_remove: 'enabled'
+                    }
+                }
+            }
+        });
 
     } catch(err) {
         console.log("Error post payment intent!", err);
@@ -58,7 +85,9 @@ async function POST_SUBMIT_PAYMENT(
 
         if(paymentIntent)
             return Response.json({
+                customerId: customer?.id ?? searchParamCustomerId,
                 clientSecret: paymentIntent.client_secret,
+                customerSessionClientSecret: customerSession?.client_secret
             });
         else
             return Response.error();
@@ -66,4 +95,4 @@ async function POST_SUBMIT_PAYMENT(
 
 }
 
-export { POST_SUBMIT_PAYMENT as POST };
+export { POST_INITIALIZE_CUSTOMER_SESSION as POST };

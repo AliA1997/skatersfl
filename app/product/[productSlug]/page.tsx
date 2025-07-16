@@ -1,5 +1,5 @@
 import ProductDetailCard from "@/components/product/ProductDetailCard";
-import ProductsMarqueeWrapper from "@/components/product/ProductsMarqueeWrapper";
+import {ProductsMarqueeWrapper} from "@/components/product/ProductsMarqueeWrapper";
 import { CategoryForProduct, Product } from "@/lib/types";
 import { getCategoryById, getProductBySlug, getProductsSlug } from "@/sanity/lib/sanity.query";
 import type { Metadata } from "next";

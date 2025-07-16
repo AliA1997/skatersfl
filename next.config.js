@@ -10,7 +10,7 @@ const nextConfig = {
     formats: ["image/webp"],
   },
   experimental: {
-    serverComponentsExternalPackages: ['undici']
+    serverComponentsExternalPackages: ['undici', 'stream']
   }
 };
 

@@ -32,6 +32,24 @@ export type StripePaymentRequest = {
   products: { id: string, price: number, quantity: number }[];
 }
 
+export type StripeUpdateCustomerForm = {
+    name: string;
+    email: string;
+    address: {
+      line1: string | undefined;
+      line2: string | undefined;
+      city: string | undefined;
+      state: string | undefined;
+      country: string | undefined;
+      zipcode: string | undefined;
+    }
+};
+
+export type StripeCapturePaymentRequest = {
+  paymentIntentClientSecret: string;
+  customerInfo?: StripeUpdateCustomerForm;
+};
+
 export type StripePaymentIntentProductMetadata = {
   id: string;
   title: string;

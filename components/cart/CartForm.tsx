@@ -1,15 +1,14 @@
 "use client";
-import { AddressElement, CardCvcElement, PaymentElement, useElements, useStripe } from "@stripe/react-stripe-js";
+import { AddressElement, PaymentElement, useElements, useStripe } from "@stripe/react-stripe-js";
 import { Button } from "../ui/button";
 import { Loader2 } from "lucide-react";
 import { useRef, useState } from "react";
 import { StripeElements } from "@stripe/stripe-js";
+import { useCartStore } from "@/store/useCartStore";
 
-type Props = {
-    stripePaymentIntentId: string;
-};
+type Props = {};
 
-export default function CartForm({ stripePaymentIntentId }: Props) {
+export default function CartForm({  }: Props) {
     const buttonRef = useRef(null);
     const formRef = useRef(null);
     const stripe = useStripe();
@@ -17,28 +16,44 @@ export default function CartForm({ stripePaymentIntentId }: Props) {
     const [message, setMessage] = useState('');
     const [isLoading, setIsLoading] = useState(false);
         console.log('elements card:', elements?.getElement('card'))
+    const { 
+        setPaymentIntentSecret, 
+        setCustomerSessionId,
+        customerId,
+        customerSessionId,
+        paymentIntentSecret
+    } = useCartStore();
+
+    const redirectUrl = (): string => {
+        // someFunction();
+        return `${process.env.NEXT_PUBLIC_SITE_URL}/cart/success?paymentIntentSecret=${encodeURIComponent(paymentIntentSecret)}&success=true`
+    };
 
     const onSubmit =  async (e: React.FormEvent) => {
         e.preventDefault();
         setIsLoading(true);
+        await elements?.submit();
         const { error } = await stripe!.confirmPayment({
             elements: elements as StripeElements,
+            clientSecret: paymentIntentSecret,
             confirmParams: {
-                return_url: `${process.env.NEXT_PUBLIC_SITE_URL}/cart/success?paymentIntentId=${stripePaymentIntentId}&success=true`,
-            },
-            redirect: 'if_required'
+                return_url: redirectUrl(),
+            }
         });
 
         if (error) {
-            console.log("errro:", error)
+            console.log("confirmation payment error:", error)
             alert(JSON.stringify(error));
             if (error.type === 'card_error' || error.type === 'validation_error') {
                 setMessage(error.message || 'An error occurred.');
             } else {
                 setMessage('An unexpected error occurred.');
             }
+            setPaymentIntentSecret('');
+            setCustomerSessionId('');
         }
 
+        console.log("element address", elements?.getElement('address'));
         setIsLoading(false);
     };
 
@@ -51,9 +66,10 @@ export default function CartForm({ stripePaymentIntentId }: Props) {
                 <PaymentElement 
                     options={{
                         layout: {
-                            type: 'tabs'
-                        },  
+                            type: 'tabs',
+                        },
                     }}
+                    
                 />
                 <AddressElement 
                     options={{ mode: 'billing' }} 
@@ -63,7 +79,7 @@ export default function CartForm({ stripePaymentIntentId }: Props) {
                     type="submit"
                     className="rounded-md px-4 py-2 text-white cursor-pointer hover:opacity-80"
                     style={{ cursor: 'cursor-pointer' }}
-                    disabled={isLoading}
+                    disabled={isLoading || !stripe || !elements}
                 >
                     {isLoading ? (
                         <div className=" flex flex-row gap-2">

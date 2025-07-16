@@ -10,9 +10,10 @@ import { useCartStore } from "@/store/useCartStore";
 import LoadingSection from "../LoadingSection";
 
 type Props = {
-  paymentIntentId: string | undefined;
-  redirectStatus: string | undefined;
+  paymentIntentClientSecret: string;
+  paymentIntentId: string;
 };
+
 
 function PaymentSuccessInfoContainer({ children }: React.PropsWithChildren<any>) {
   return (
@@ -45,16 +46,18 @@ function CurrencyFormatter({
 };
 
 
-export default function PaymentSuccessInfo({ paymentIntentId, redirectStatus }: Props) {
+export default function PaymentSuccessInfo({ paymentIntentClientSecret, paymentIntentId }: Props) {
   const stripe = useStripe();
-  const { cart, resetCart } = useCartStore();
+  const { cart, resetCart, paymentIntentSecret, setCustomerSessionId, setPaymentIntentSecret } = useCartStore();
   const [mounted, setMounted] = useState(false);
+  const [paymentCaptured, setPaymentCaptured] = useState(false);
   const [message, setMessage] = useState<string>('');
   const [status, setStatus] = useState<PaymentIntent.Status | undefined>(undefined);
   const [currentPaymentIntent, setCurrentPaymentIntent] = useState<PaymentIntent | undefined>(undefined);
 
   const getPaymentStatus = async () => {
-    const paymentIntentResult = await stripe?.retrievePaymentIntent(paymentIntentId!);
+    const paymentIntentResult = await stripe?.retrievePaymentIntent(paymentIntentClientSecret!);
+    debugger;
     if (!paymentIntentResult || !paymentIntentResult.paymentIntent)
       return;
 
@@ -73,20 +76,35 @@ export default function PaymentSuccessInfo({ paymentIntentId, redirectStatus }: 
     setStatus(paymentIntent.status);
   };
 
+  // useEffect(() => {
+  //   console.log('paymentIntentId:', paymentIntentId);
+  //   if(paymentIntentId && paymentIntentClientSecret && customerId)
+  //     capturePayment();
+
+  // }, [customerId, paymentIntentId])
+
   useEffect(() => {
-    if (paymentIntentId && currentPaymentIntent?.id !== paymentIntentId)
-      getPaymentStatus();
+    debugger;
+    if (paymentIntentId && currentPaymentIntent?.client_secret !== paymentIntentClientSecret)
+      getPaymentStatus()
+        .then(() => {
+          setMounted(true);
+        });
 
-    setMounted(true);
-
-    return () => {
-      setMounted(false);
-    }
+    else 
+      setMounted(true);
 
   }, [stripe]);
 
+  useEffect(() => {
+    return () => {
+      setMounted(false);
+      setPaymentIntentSecret('');
+      setCustomerSessionId('');
+    };
+  }, [])
 
-  if(mounted) {
+  if (mounted) {
 
     if (status && !isPaymentSuccessful(status) && !(cart && cart.length)) {
       return (
@@ -100,8 +118,8 @@ export default function PaymentSuccessInfo({ paymentIntentId, redirectStatus }: 
         </PaymentSuccessInfoContainer>
       );
     }
-  
-  
+
+
     if (!message && currentPaymentIntent && isPaymentSuccessful(status ?? "requires_action")) {
       return (
         <PaymentSuccessInfoContainer>
@@ -114,13 +132,13 @@ export default function PaymentSuccessInfo({ paymentIntentId, redirectStatus }: 
           <div className="flex flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-secondary p-4">
             <p className="text-center text-lg">
               The order details and a link to the payment has been sent to your email of {" "}
-              <span className="underline">{currentPaymentIntent.receipt_email ?? 'testuser@gmail.com'}</span> 
+              <span className="underline">{currentPaymentIntent.receipt_email ?? 'testuser@gmail.com'}</span>
             </p>
             <p className="text-center text-lg underline">
               <span>Amount Paid:  </span>
-              <CurrencyFormatter currency="USD" amount={currentPaymentIntent.amount} />
+              <CurrencyFormatter currency="USD" amount={(currentPaymentIntent.amount / 100)} />
             </p>
-  
+
             <div className="mt-4 flex flex-row gap-2">
               <Link href={"/"}>
                 <Button variant={"secondary"}>Continue Shopping</Button>
@@ -130,7 +148,7 @@ export default function PaymentSuccessInfo({ paymentIntentId, redirectStatus }: 
         </PaymentSuccessInfoContainer>
       );
     }
-  
+
     if (message) {
       return (
         <PaymentSuccessInfoContainer>
@@ -156,9 +174,9 @@ export default function PaymentSuccessInfo({ paymentIntentId, redirectStatus }: 
           </div>
         </PaymentSuccessInfoContainer>
       );
-  }
+    }
 
-  
+
     if (status && !isPaymentSuccessful(status)) {
       return (
         <PaymentSuccessInfoContainer>

@@ -39,7 +39,11 @@ export default async function MenuSheet({
           </SheetClose>
           {categories.map((category: Category, index: number) => (
             <SheetClose asChild key={index}>
-              <Link href={`/category/${category.slug}`}>
+              <Link 
+                href={`/category/${category.slug.current}`}
+                legacyBehavior
+                passHref  
+              >
                 <Button className="text-lg" variant="ghost">
                   {category.title}
                 </Button>

@@ -16,14 +16,18 @@ export type State = {
   cart: Product[];
   totalItems: number;
   totalAmount: number;
-  paymentIntentId: string;
+  paymentIntentSecret: string;
+  customerId: string;
+  customerSessionId: string;
 };
 
 export type Actions = {
   addToCart: (Item: Product) => void;
   removeFromCart: (Item: Product) => void;
   deleteFromCart: (Item: Product) => void;
-  setPaymentIntentId: (paymentIntentId: string) => void;
+  setPaymentIntentSecret: (paymentIntentSecret: string) => void;
+  setCustomerSessionId: (customerSessionId: string) => void;
+  setCustomerId: (customerId: string)  => void;
   resetCart: () => void;
 };
 
@@ -31,7 +35,9 @@ const INITIAL_STATE = {
   cart: [],
   totalItems: 0,
   totalAmount: 0,
-  paymentIntentId: ''
+  paymentIntentSecret: '',
+  customerId: '',
+  customerSessionId: '',
 };
 
 export const useCartStore = create(
@@ -40,7 +46,9 @@ export const useCartStore = create(
       cart: INITIAL_STATE.cart,
       totalItems: INITIAL_STATE.totalItems,
       totalAmount: INITIAL_STATE.totalAmount,
-      paymentIntentId: INITIAL_STATE.paymentIntentId,
+      paymentIntentSecret: INITIAL_STATE.paymentIntentSecret,
+      customerId: INITIAL_STATE.customerId,
+      customerSessionId: INITIAL_STATE.customerSessionId,
       addToCart: (product: Product) => {
         const cart = get().cart;
         const cartItem = cart.find(
@@ -101,10 +109,22 @@ export const useCartStore = create(
           ),
         }));
       },
-      setPaymentIntentId: (paymentIntentId: string) => {
+      setPaymentIntentSecret: (paymentIntentSecret: string) => {
         set((state) => ({
           ...state,
-          paymentIntentId: paymentIntentId
+          paymentIntentSecret: paymentIntentSecret
+        }))
+      },
+      setCustomerId: (customerId: string) => {
+        set((state) => ({
+          ...state,
+          customerId: customerId
+        }))
+      },
+      setCustomerSessionId: (customerSessionId: string) => {
+        set((state) => ({
+          ...state,
+          customerSessionId: customerSessionId
         }))
       },
       resetCart: () => {
@@ -112,7 +132,7 @@ export const useCartStore = create(
           cart: INITIAL_STATE.cart,
           totalItems: INITIAL_STATE.totalItems,
           totalAmount: INITIAL_STATE.totalAmount,
-          paymentIntentId: INITIAL_STATE.paymentIntentId
+          paymentIntentSecret: INITIAL_STATE.paymentIntentSecret,
         }))
       }
     }),

@@ -11,7 +11,7 @@ export default function CartProductCard({
   addToCart,
   removeFromCart,
   deleteFromCart,
-}: Omit<Actions, "resetCart" | "setPaymentIntentId"> & { product: Product }) {
+}: Omit<Actions, "resetCart" | "setPaymentIntentSecret" | "setCustomerSessionId" | "setCustomerId"> & { product: Product }) {
   return (
     <Card className="mb-2 flex flex-row p-1">
       <CardContent className="flex w-full flex-row p-0">
