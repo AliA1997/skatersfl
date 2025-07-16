@@ -24,9 +24,9 @@ export const metadata: Metadata = {
     default: "skatersfl",
   },
   description:
-    "Manufacturer, Wholesaler & Exporter of Jute bags, Cotton Bag for Corporate Events & Exhibitions",
+    "A cornerstone in the skateboarding community, providing quality products and services to skaters.",
   keywords:
-    "Jute bags, Cotton Bag, Canvas Bags, File Folders, Denim Bags, Pouches",
+    "Skateboards, Wheels, Tape, and other accessories",
   alternates: {
     canonical: "/",
   },
